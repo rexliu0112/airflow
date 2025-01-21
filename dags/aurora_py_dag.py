@@ -1,22 +1,20 @@
 from __future__ import annotations
 
-# [START tutorial]
-# [START import_module]
 import textwrap
 from datetime import datetime, timedelta
-
-# The DAG object; we'll need this to instantiate a DAG
-from airflow.models.dag import DAG
-from airflow.utils.dates import days_ago
-# Operators; we need this to operate!
+from airflow.operators.python import PythonOperator 
 from airflow.operators.bash import BashOperator
-
+from airflow.models.dag import DAG
+from airflow.operators.bash import BashOperator
+import pendulum
 # [END import_module]
-
+def execute_py(script_path):
+    import subprocess
+    subprocess.run(['python', script_path], check=True)
 
 # [START instantiate_dag]
 with DAG(
-    "Test1",
+    "aurora_py_etl",
     # [START default_args]
     # These args will get passed on to each operator
     # You can override them on a per-task basis during operator initialization
@@ -43,11 +41,11 @@ with DAG(
         # 'trigger_rule': 'all_success'
     },
     # [END default_args]
-    description="Test_sample_DAG",
+    description="aurora_py_dag",
     schedule=timedelta(days=1),
-    start_date=days_ago(2),
+    start_date=pendulum.today('UTC').add(days=-2),
     catchup=False,
-    tags=["Rex_Test"],
+    tags=["Rex_Test","ETL","aurora"],
 ) as dag:
     # [END instantiate_dag]
 
@@ -58,7 +56,32 @@ with DAG(
     dag.doc_md = """
     This is a documentation placed anywhere
     """  # otherwise, type it like this
-    # [END documentation]
+    
+     # 執行 print_trend.py
+    task_print_trend = BashOperator(
+        task_id='run_print_trend',
+        bash_command='python3 /mnt/d/aurora/py_scripts/print_trend.py',
+    )
+    # 執行 revenue_trend.py
+    task_revenue_trend = BashOperator(
+        task_id='run_revenue_trend',
+        bash_command='python3 /mnt/d/aurora/py_scripts/evenue_trend.py',
+    )
+
+    # 執行 print_peak_IOT.py
+    task_print_peak_IOT = BashOperator(
+        task_id='run_print_peak_IOT',
+        bash_command='python3 /mnt/d/aurora/py_scripts/print_peak_IOT.py',
+    )
+
+    # 執行 print_peak_month.py
+    task_print_peak_month = BashOperator(
+        task_id='run_print_peak_month',
+        bash_command='python3 /mnt/d/aurora/py_scripts/print_peak_month.py',
+    )
+
+    # 定義執行順序
+[task_print_trend, task_revenue_trend] >> task_print_peak_IOT >> task_print_peak_month    # [END documentation]
 
     # [START jinja_template]
 
