@@ -42,14 +42,12 @@ with DAG(
     },
     # [END default_args]
     description="aurora_py_dag",
-    schedule=timedelta(days=1),
+    schedule="0 22 * * 1-5",
     start_date=pendulum.today('UTC').add(days=-2),
     catchup=False,
     tags=["Rex_Test","ETL","aurora"],
 ) as dag:
-    # [END instantiate_dag]
-
-    # t1, t2 and t3 are examples of tasks created by instantiating operators
+   
 
 
     #dag.doc_md = __doc__  # providing that you have a docstring at the beginning of the DAG; OR
@@ -83,6 +81,3 @@ with DAG(
     # 定義執行順序
 [task_print_trend, task_revenue_trend] >> task_print_peak_IOT >> task_print_peak_month    # [END documentation]
 
-    # [START jinja_template]
-
-# [END tutorial]
