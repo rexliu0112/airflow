@@ -7,11 +7,25 @@ from airflow.operators.bash import BashOperator
 from airflow.models.dag import DAG
 from airflow.operators.bash import BashOperator
 import pendulum
+from airflow import DAG
+from airflow.utils.dates import days_ago
+
+# 設定時區為台北時間
+local_tz = pendulum.timezone("Asia/Taipei")
+
 # [END import_module]
 def execute_py(script_path):
     import subprocess
     subprocess.run(['python', script_path], check=True)
+Comp = 'A0A2'
+today = '2025-02-12'
+dbo_schema = 'dbo_A0A2' 
+datamart_schema = 'datamart_A0A2'
+feature_schema = 'feature_A0A2'
 
+def run_py_command(py_file,Comp,today,dbo_schema,datamart_schema,feature_schema):
+    command_string = f"python3 /mnt/d/aurora/py_scripts/{py_file} --Comp {Comp} --today {today} --dbo_schema {dbo_schema} --datamart_schema {datamart_schema} --feature_schema {feature_schema}"
+    return command_string
 # [START instantiate_dag]
 with DAG(
     "aurora_py_etl",
@@ -42,8 +56,8 @@ with DAG(
     },
     # [END default_args]
     description="aurora_py_dag",
-    schedule="0 22 * * 1-5",
-    start_date=pendulum.today('UTC').add(days=-2),
+    schedule="18 19 * * 1-5",
+    start_date=pendulum.datetime(2025, 2, 11, tz="Asia/Taipei"),
     catchup=False,
     tags=["Rex_Test","ETL","aurora"],
 ) as dag:
@@ -58,24 +72,24 @@ with DAG(
      # 執行 print_trend.py
     task_print_trend = BashOperator(
         task_id='run_print_trend',
-        bash_command='python3 /mnt/d/aurora/py_scripts/print_trend.py',
+        bash_command=run_py_command('print_trend.py',Comp,today,dbo_schema,datamart_schema,feature_schema),
     )
     # 執行 revenue_trend.py
     task_revenue_trend = BashOperator(
         task_id='run_revenue_trend',
-        bash_command='python3 /mnt/d/aurora/py_scripts/evenue_trend.py',
+        bash_command=run_py_command('revenue_trend.py',Comp,today,dbo_schema,datamart_schema,feature_schema),
     )
 
     # 執行 print_peak_IOT.py
     task_print_peak_IOT = BashOperator(
         task_id='run_print_peak_IOT',
-        bash_command='python3 /mnt/d/aurora/py_scripts/print_peak_IOT.py',
+        bash_command=run_py_command('print_peak_IOT.py',Comp,today,dbo_schema,datamart_schema,feature_schema),
     )
 
     # 執行 print_peak_month.py
     task_print_peak_month = BashOperator(
         task_id='run_print_peak_month',
-        bash_command='python3 /mnt/d/aurora/py_scripts/print_peak_month.py',
+        bash_command=run_py_command('print_peak_month.py',Comp,today,dbo_schema,datamart_schema,feature_schema),
     )
 
     # 定義執行順序
