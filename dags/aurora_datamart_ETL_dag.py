@@ -70,7 +70,7 @@ with DAG(
         params={"dbo_schema": dbo_schema,"datamart_schema":datamart_schema,'today':today}
      
     )
-    
+    #
     
     # 執行 print_trend.py
     DLContractPrintRange = SQLExecuteQueryOperator(

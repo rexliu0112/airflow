@@ -53,7 +53,7 @@ with DAG(
         # 'sla_miss_callback': yet_another_function, # or list of functions
         # 'on_skipped_callback': another_function, #or list of functions
         # 'trigger_rule': 'all_success'
-    },
+    },#
     # [END default_args]
     description="aurora_py_dag",
     schedule="18 19 * * 1-5",
